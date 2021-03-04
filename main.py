@@ -21,6 +21,7 @@ allow_plain = str_to_bool(os.environ.get(
 secret_key = os.environ.get("VEGALITE_SERVER_SECRET_KEY", "blank")
 production_server = str_to_bool(
     os.environ.get("VEGALITE_SERVER_PRODUCTION", "true"))
+PORT = int(os.environ.get('PORT', 5000))
 
 app = Flask(__name__)
 
@@ -46,7 +47,13 @@ def construct_url_from_spec(spec, width=500, encrypted=True):
 
 @app.route("/")
 def home():
-    return("The endpoint you are looking for is /convert_spec")
+    messages = ["The endpoint you are looking for is /convert_spec."]
+    if secret_key != "blank":
+        messages.append("Server key configured.")
+    if allow_plain:
+        messages.append("Unencrypted allowed.")        
+
+    return("<br>".join(messages))
 
 @app.route("/convert_spec")
 def convert_spec():
@@ -88,7 +95,7 @@ def convert_spec():
         save(json_spec, out, fmt=image_format, vega_cli_options=node_args)
     else:
         sout = io.StringIO()
-        save(chart, sout, fmt=image_format)
+        save(json_spec, sout, fmt=image_format)
         out = io.BytesIO()
         out.write(sout.getvalue().encode())
     out.seek(0)
@@ -97,12 +104,8 @@ def convert_spec():
     return send_file(out, mimetype=mime_type)
 
 
-def return_app():
-    return app
-
-
 if __name__ == "__main__":
     if production_server:
-        serve(app, host='0.0.0.0', port=5000)
+        serve(app, host='0.0.0.0', port=PORT)
     else:
         app.run(host="0.0.0.0", debug=True)

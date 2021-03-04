@@ -1,0 +1,6 @@
+build:
+  docker:
+    web: Dockerfile
+  config:
+    VEGALITE_SERVER_PRODUCTION: true
+    ALLOW_PLAIN: false
