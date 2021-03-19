@@ -2,11 +2,11 @@ FROM python:3.8-buster
 
 ENV DEBIAN_FRONTEND noninteractive
 
-COPY script/chrome_setup.bash /
-RUN /chrome_setup.bash
-
 RUN mkdir /app
 WORKDIR /app
+
+COPY script/chrome_setup.bash /
+RUN /chrome_setup.bash
 
 COPY requirements.txt .
 RUN pip install -r requirements.txt
