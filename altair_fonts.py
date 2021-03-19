@@ -3,6 +3,21 @@ Include google font in code
 """
 
 import altair_saver.savers._selenium
+import selenium.webdriver
+
+
+# this is a bit horrible, but wrap the webdriver in an extra option
+chrome_driver_options = selenium.webdriver.chrome.options.Options
+
+
+def override_chrome_options():
+    print("overriding selenium to add option")
+    options = chrome_driver_options()
+    options.add_argument('--disable-dev-shm-usage')
+    return options
+
+
+selenium.webdriver.chrome.options.Options = override_chrome_options
 
 """
 update html template and extract code used to add reference to font
