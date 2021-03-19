@@ -8,6 +8,7 @@ import os
 import urllib.parse
 
 from altair_saver import save
+from altair_fonts import load_font
 from cryptography.fernet import Fernet
 from flask import Flask, request, send_file
 from waitress import serve
@@ -22,6 +23,10 @@ secret_key = os.environ.get("VEGALITE_SERVER_SECRET_KEY", "blank")
 production_server = str_to_bool(
     os.environ.get("VEGALITE_SERVER_PRODUCTION", "true"))
 PORT = int(os.environ.get('PORT', 5000))
+google_font = os.environ.get("GOOGLE_FONT_STRING", "Source Sans Pro:400")
+
+# set google fonts to load - needs to also be specified for use within the spec.
+load_font(google_font)
 
 app = Flask(__name__)
 
@@ -45,15 +50,17 @@ def construct_url_from_spec(spec, width=500, encrypted=True):
                   "encrypted": encrypted}
     return root + "?" + urllib.parse.urlencode(parameters)
 
+
 @app.route("/")
 def home():
     messages = ["The endpoint you are looking for is /convert_spec."]
     if secret_key != "blank":
         messages.append("Server key configured.")
     if allow_plain:
-        messages.append("Unencrypted allowed.")        
+        messages.append("Unencrypted allowed.")
 
     return("<br>".join(messages))
+
 
 @app.route("/convert_spec")
 def convert_spec():
@@ -91,8 +98,9 @@ def convert_spec():
     # create binary
     if image_format in ["png", "pdf"]:
         out = io.BytesIO()
-        node_args = ["-s {0}".format(image_scale)]
-        save(json_spec, out, fmt=image_format, vega_cli_options=node_args)
+        embed_options = {"scaleFactor": image_scale}
+        node_args = []
+        save(json_spec, out, fmt=image_format, embed_options=embed_options)
     else:
         sout = io.StringIO()
         save(json_spec, sout, fmt=image_format)
