@@ -132,7 +132,10 @@ class _DriverRegistry:
             and hasattr(os, "geteuid")
             and os.geteuid() == 0
         ):
-            webdriver_options.add_argument("--no-sandbox")
+            pass
+            # this used to turn on the no sandbox argument, but need that all the time for 
+            # heruko
+        webdriver_options.add_argument("--no-sandbox")
 
         webdriver_options.add_argument("--headless")
         webdriver_options.add_argument("--disable-dev-shm-usage")
